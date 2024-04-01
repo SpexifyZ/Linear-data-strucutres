@@ -1,0 +1,249 @@
+import tkinter as tk
+from tkinter import messagebox
+from collections import defaultdict
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+
+class MyDeque:
+    def __init__(self):
+        self.head = None
+        self.tail = None
+        self.count = 0
+
+
+    def __iter__(self):
+        current = self.head
+        while current:
+            yield current.data
+            current = current.next
+
+    def isEmpty(self):
+        return self.head is None
+
+    def append(self, data):
+        new_node = Node(data)
+        if self.isEmpty():
+            self.head = self.tail = new_node
+        else:
+            self.tail.next = new_node
+            new_node.prev = self.tail
+            self.tail = new_node
+        self.count += 1
+
+    def appendleft(self, data):
+        new_node = Node(data)
+        if self.isEmpty():
+            self.head = self.tail = new_node
+        else:
+            self.head.prev = new_node
+            new_node.next = self.head
+            self.head = new_node
+        self.count += 1
+
+
+    def pop(self):
+        if self.isEmpty():
+            return None
+        self.count -= 1
+        removed_data = self.tail.data
+        if self.head == self.tail:
+            self.head = self.tail = None
+        else:
+            self.tail = self.tail.prev
+            self.tail.next = None
+        return removed_data
+
+    def popleft(self):
+        if self.isEmpty():
+            return None
+        self.count -= 1
+        removed_data = self.head.data
+        if self.head == self.tail:
+            self.head = self.tail = None
+        else:
+            self.head = self.head.next
+            self.head.prev = None
+        return removed_data
+
+    def __len__(self):
+        return self.count
+
+
+class Patient:
+    def __init__(self, id, name, dob, medical_history, medical_condition, date_of_admission):
+        self.id = id
+        self.name = name
+        self.dob = dob
+        self.medical_history = medical_history
+        self.medical_condition = medical_condition 
+        self.date_of_admission = date_of_admission 
+        self.appointments = []
+        self.doctor = None
+
+
+class Doctor:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+        self.appointments = [] 
+
+
+class Prescription:
+    def __init__(self, patient_id, doctor_id, medication):
+        self.patient_id = patient_id
+        self.doctor_id = doctor_id
+        self.medication = medication
+
+
+patients = []
+doctors = []
+consultation_queue = MyDeque()
+patient_records = {}
+doctor_records = defaultdict(list)  
+prescriptions = []
+
+
+def password1(password):
+    return password == "Password123" 
+
+
+class PatientRecordGUI(tk.Tk): 
+
+    def __init__(self):
+        super().__init__()
+        self.title("Patient Record Management System")
+        self.geometry("800x600")
+
+        preset_doctor = Doctor(id="D001", name="Dr. Ahmed")
+        doctors.append(preset_doctor)
+        doctor_records[preset_doctor.id] = [] 
+
+        if not self.password():
+            return
+
+        self.GUI_widgets()
+
+    def GUI_widgets(self):
+        self.label_patient_id = tk.Label(self, text="Patient ID:")
+        self.entry_patient_id = tk.Entry(self)
+
+
+        self.label_patient_name = tk.Label(self, text="Patient Name:")
+        self.entry_patient_name = tk.Entry(self)
+
+
+        self.label_patient_dob = tk.Label(self, text="Date of Birth (YYYY-MM-DD):")
+        self.entry_patient_dob = tk.Entry(self)
+
+
+        self.label_patient_medical_history = tk.Label(self, text="Medical History:")
+        self.entry_patient_medical_history = tk.Entry(self)
+
+        self.label_update_med = tk.Label(self, text="Update Medical Condition:")
+        self.label_doctor_id = tk.Label(self, text="Doctor ID:")
+        self.label_medication = tk.Label(self, text="Medication:")
+        self.label_patient_data = tk.Label(self, text="Search Result:")
+
+        self.label_appointment_date = tk.Label(self, text="Appointment Date (YYYY-MM-DD):")
+        self.label_appointment_date.grid(row=14, column=0, pady=5)
+        self.entry_appointment_date = tk.Entry(self)
+        self.entry_appointment_date.grid(row=14, column=2, padx=5)
+
+        self.entry_patient_id = tk.Entry(self)
+        self.entry_update_med = tk.Entry(self)
+        self.entry_doctor_id = tk.Entry(self)
+        self.entry_medication = tk.Entry(self)
+
+        self.text_patient_data = tk.Text(self, width=50, height=10, state=tk.DISABLED)
+        self.text_patient_data.grid(row=9, columnspan=2, padx=5)
+
+        self.button_add_patient = tk.Button(self, text="Add Patient", command=self.add_patientrecord)
+        self.button_update_patient = tk.Button(self, text="Update Patient", command=self.update_patientrecord)
+        self.button_remove_patient = tk.Button(self, text="Remove Patient", command=self.remove_patientrecord)
+        self.button_book_appointment = tk.Button(self, text="Book Appointment",
+                                                     command=self.book_appointment)
+        self.button_describe_prescription = tk.Button(self, text="Describe Prescription", command=self.describe_prescription)
+        self.button_findpatient = tk.Button(self, text="Find Patient", command=self.findpatient)
+
+        self.button_process_current_patient = tk.Button(self, text="Process Current Patient",
+                                                     command=self.process_current_patient)
+        self.button_process_current_patient.grid(row=14, column=1, pady=5)
+
+
+
+
+        self.label_medical_condition = tk.Label(self, text="Medical Condition:")
+        self.label_medical_condition.grid(row=4, column=0, pady=5)
+        self.entry_medical_condition = tk.Entry(self)
+        self.entry_medical_condition.grid(row=4, column=1, padx=5)
+
+        self.label_date_of_admission = tk.Label(self, text="Date of Admission (YYYY-MM-DD):")
+        self.label_date_of_admission.grid(row=5, column=0, pady=5)
+        self.entry_date_of_admission = tk.Entry(self)
+        self.entry_date_of_admission.grid(row=5, column=1, padx=5)
+
+        self.label_patient_id.grid(row=0, column=0, pady=5)
+        self.entry_patient_id.grid(row=0, column=1, padx=5)
+
+        self.label_patient_name.grid(row=1, column=0, pady=5)
+        self.entry_patient_name.grid(row=1, column=1, padx=5)
+
+        self.label_patient_dob.grid(row=2, column=0, pady=5)
+        self.entry_patient_dob.grid(row=2, column=1, padx=5)
+
+        self.label_patient_medical_history.grid(row=3, column=0, pady=5)
+        self.entry_patient_medical_history.grid(row=3, column=1, padx=5)
+
+        self.label_medical_condition.grid(row=4, column=0, pady=5)
+        self.entry_medical_condition.grid(row=4, column=1, padx=5)
+
+        self.label_date_of_admission.grid(row=5, column=0, pady=5)
+        self.entry_date_of_admission.grid(row=5, column=1, padx=5)
+
+        self.button_add_patient.grid(row=6, column=1, pady=5)
+
+        self.button_remove_patient.grid(row=6, column=2, pady=5)
+
+        self.label_update_med.grid(row=7, column=0, pady=5)
+        self.entry_update_med.grid(row=7, column=1, padx=5)
+
+        
+        self.button_update_patient.grid(row=8, column=1, pady=5)
+
+        self.label_doctor_id.grid(row=9, column=0, pady=5)
+        self.entry_doctor_id.grid(row=9, column=1, padx=5)
+
+        self.label_appointment_date.grid(row=10, column=0, pady=5)
+        self.entry_appointment_date.grid(row=10, column=1, padx=5)
+
+        
+        self.button_book_appointment.grid(row=11, column=1, pady=5)
+
+        
+        self.label_medication.grid(row=12, column=0, pady=5)
+        self.entry_medication.grid(row=12, column=1, padx=5)
+
+        self.button_describe_prescription.grid(row=13, column=1, pady=5)
+
+        self.button_findpatient.grid(row=14, column=1, pady=5)
+        self.button_findpatient = tk.Button(self, text="Find Patient", command=self.findpatient)
+        self.button_findpatient.grid(row=15, column=1, pady=5)
+
+        self.label_patient_data.grid(row=15, column=0, pady=5)
+        self.text_patient_data.grid(row=16, column=0, columnspan=2, padx=5, pady=5)
+
+        self.label_consultation_queue = tk.Label(self, text="Consultation Queue:")
+        self.label_consultation_queue.grid(row=15, column=0, pady=5) 
+        self.listbox_consultation_queue = tk.Listbox(self, height=10, width=50)
+        self.listbox_consultation_queue.grid(row=15, column=1, columnspan=2, padx=5, sticky="ew")
+        self.label_consultation_queue.grid(row=17, column=0, pady=5)
+        self.listbox_consultation_queue.grid(row=18, column=0, columnspan=2, padx=5, sticky="ew")
+
+        self.button_process_current_patient = tk.Button(self, text="Process Current Patient",
+                                                        command=self.process_current_patient)
+        self.button_process_current_patient.grid(row=14, column=1, pady=5) 
