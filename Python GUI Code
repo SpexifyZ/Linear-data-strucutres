@@ -247,3 +247,237 @@ class PatientRecordGUI(tk.Tk):
         self.button_process_current_patient = tk.Button(self, text="Process Current Patient",
                                                         command=self.process_current_patient)
         self.button_process_current_patient.grid(row=14, column=1, pady=5) 
+
+def password(self):
+        password_window = tk.Toplevel(self)
+        password_window.title("Enter Password")
+        password_window.geometry("200x100")
+
+        password_label = tk.Label(password_window, text="Password:")
+        password_label.pack(pady=5)
+
+        password_entry = tk.Entry(password_window, show="*")
+        password_entry.pack(pady=5)
+
+        def check_pass(event=None):
+            entered_password = password_entry.get()
+            if password1(entered_password):
+                password_window.destroy()
+                self.GUI_widgets()
+            else:
+                messagebox.showerror("Error", "Invalid password!")
+
+        password_window.bind("<Return>", check_pass)
+        button_check = tk.Button(password_window, text="Check", command=check_pass)
+        button_check.pack(pady=5)
+
+        password_window.mainloop()
+        return True
+
+    def add_patientrecord(self):
+        patient_id = self.entry_patient_id.get()
+        name = self.entry_patient_name.get()
+        dob = self.entry_patient_dob.get()
+        medical_history = self.entry_patient_medical_history.get()
+        medical_condition = self.entry_medical_condition.get()  
+        date_of_admission = self.entry_date_of_admission.get()  
+
+        if patient_id and name and dob and medical_history and medical_condition and date_of_admission:
+            new_patient = Patient(patient_id, name, dob, medical_history, medical_condition, date_of_admission)
+            patients.append(new_patient)
+            patient_records[patient_id] = new_patient
+            messagebox.showinfo("Success!", "Patient record has been added.")
+        else:
+            messagebox.showerror("Error", "Please fill in all fields.")
+
+    def update_patientrecord(self):
+        patient_id = self.entry_patient_id.get()
+        update_med = self.entry_update_med.get()  
+        if patient_id in patient_records:
+            patient_records[patient_id].medical_history = update_med
+            messagebox.showinfo("Success!", "Patient record has been updated.")
+        else:
+            messagebox.showerror("Error", "Patient not found.")
+
+    def remove_patientrecord(self):
+        patient_id = self.entry_patient_id.get()
+        if patient_id in patient_records:
+            del patient_records[patient_id]
+            messagebox.showinfo("Success!", "Patient record has been removed.")
+        else:
+            messagebox.showerror("Error", "Patient not found.")
+
+    def book_appointment(self):
+        patient_id = self.entry_patient_id.get()
+        doctor_id = self.entry_doctor_id.get()
+        appointment_date = self.get_appointment_date() 
+
+        if patient_id in patient_records and doctor_id in doctor_records:
+            if self.available_appointments(doctor_id, appointment_date):
+    
+                appointment = (patient_id, doctor_id, appointment_date)
+                patient_records[patient_id].appointments.append(appointment)
+                doctor_records[doctor_id].append(appointment)
+                
+                consultation_queue.append(patient_id)
+                self.update_consultation_display()
+                messagebox.showinfo("Success!", "Appointment Booked and patient has been added to the queue.")
+            else:
+                messagebox.showerror("Error", "Doctor unavailable on selected date.")
+        else:
+            messagebox.showerror("Error", "Invalid patient or doctor ID.")
+
+    def process_current_patient(self):
+        if not consultation_queue.isEmpty():
+            patient_id = consultation_queue.popleft()  
+            self.update_consultation_display()  
+   
+        else:
+            messagebox.showerror("Error", "There are no patients in the queue.")
+
+    def update_consultation_display(self):
+        self.listbox_consultation_queue.delete(0, tk.END) 
+
+        for index, patient_id in enumerate(consultation_queue):
+            
+            if patient_id in patient_records:
+                patient_name = patient_records[patient_id].name
+                display_text = f"{patient_id} - {patient_name}"
+            else:
+                display_text = f"{patient_id} - Name not found"
+
+            
+            if index == 0:  
+                display_text = "First: " + display_text
+            elif index == len(consultation_queue) - 1:  
+                display_text = "Last: " + display_text
+
+            self.listbox_consultation_queue.insert(tk.END, display_text)
+
+    def get_appointment_date(self):
+        return self.entry_appointment_date.get()
+    def describe_prescription(self):
+        patient_id = self.entry_patient_id.get()
+        doctor_id = self.entry_doctor_id.get()
+        medication = self.entry_medication.get()
+        if patient_id in patient_records and doctor_id and medication:
+            
+            messagebox.showinfo("Success", "Prescription described.")
+        else:
+            messagebox.showerror("Error", "Invalid input.")
+
+    def available_appointments(self, doctor_id, appointment_date):
+
+        
+        if doctor_id not in doctor_records:
+            messagebox.showerror("Error", "Doctor ID not found.")
+            return False
+
+      
+        for appointment in doctor_records[doctor_id]:
+            if appointment[2] == appointment_date:  
+                messagebox.showerror("Error", f"Doctor is not available on {appointment_date}.")
+                return False
+
+        
+        return True
+
+    def describe_prescription(self):
+        
+        patient_id = self.entry_patient_id.get().strip()
+        doctor_id = self.entry_doctor_id.get().strip()
+        medication = self.entry_medication.get().strip()
+
+        
+        if patient_id in patient_records:
+            new_prescription = Prescription(patient_id, doctor_id, medication)
+            prescriptions.append(new_prescription)
+            messagebox.showinfo("Success", "Prescription described to " + patient_records[patient_id].name)
+        else:
+            messagebox.showerror("Error", "Patient ID not found.")
+
+    def findpatient(self):
+        patient_id = self.entry_patient_id.get().strip() 
+        if patient_id in patient_records:
+            patient = patient_records[patient_id]
+            medications = [prescription.medication for prescription in prescriptions if
+                           prescription.patient_id == patient_id]
+
+            medications_str = ", ".join(medications) if medications else "No medications found"
+
+            
+            patient_data = (f"Patient ID: {patient.id}\n"
+                             f"Name: {patient.name}\n"
+                             f"Date of Birth: {patient.dob}\n"
+                             f"Medical History: {patient.medical_history}\n"
+                             f"Medical Condition: {patient.medical_condition}\n"
+                             f"Date of Admission: {patient.date_of_admission}\n"
+                             f"Medications: {medications_str}")
+            self.text_patient_data.config(state=tk.NORMAL)
+            self.text_patient_data.delete(1.0, tk.END)
+            self.text_patient_data.insert(tk.END, patient_data)
+            self.text_patient_data.config(state=tk.DISABLED)
+        else:
+            messagebox.showerror("Error", "Patient not found.")
+
+    def sort_patients(self):
+        
+        sort_option = self.get_sort_option()  
+        if sort_option == "id":
+            sorted_patients = sorted(patients, key=lambda p: p.id)
+        elif sort_option == "name":
+            sorted_patients = sorted(patients, key=lambda p: p.name)
+        
+        elif sort_option == "admission_date":
+            sorted_patients = sorted(patients, key=lambda p: p.admission_date)
+        
+        else:
+            print("Invalid sort option.")
+            return
+
+        
+        for i, patient in enumerate(sorted_patients):
+            patient_records[patient.id] = patient
+
+        print("Patients sorted successfully.")
+
+    def get_sort_option(self):
+        return "id"
+
+    def create_menu(self):
+        menu_bar = tk.Menu(self)
+
+        
+        file_menu = tk.Menu(menu_bar, tearoff=0)
+        file_menu.add_command(label="Exit", command=self.quit)
+        menu_bar.add_cascade(label="File", menu=file_menu)
+
+        
+        patient_menu = tk.Menu(menu_bar, tearoff=0)
+        patient_menu.add_command(label="Add Patient Record", command=self.add_patientrecord)
+        patient_menu.add_command(label="Update Patient Record", command=self.update_patientrecord)
+        patient_menu.add_command(label="Remove Patient Record", command=self.remove_patientrecord)
+        patient_menu.add_command(label="Search Patient", command=self.findpatient)
+        patient_menu.add_command(label="Sort Patients", command=self.sort_patients)
+        menu_bar.add_cascade(label="Patient Management", menu=patient_menu)
+
+        
+        appointment_menu = tk.Menu(menu_bar, tearoff=0)
+        appointment_menu.add_command(label="Book Appointment", command=self.book_appointment)
+        menu_bar.add_cascade(label="Appointment Management", menu=appointment_menu)
+
+        
+        prescription_menu = tk.Menu(menu_bar, tearoff=0)
+        prescription_menu.add_command(label="Describe Prescription", command=self.describe_prescription)
+        menu_bar.add_cascade(label="Prescription Management", menu=prescription_menu)
+
+        self.config(menu=menu_bar)
+
+    def main(self):
+        self.create_menu()  
+        self.mainloop()
+
+
+if __name__ == "__main__":
+    app = PatientRecordGUI()
+    app.main()
