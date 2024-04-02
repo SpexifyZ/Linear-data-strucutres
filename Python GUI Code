@@ -15,16 +15,18 @@ class MyDeque:
         self.tail = None
         self.count = 0
 
-
+    # iterating through the deque 
     def __iter__(self):
         current = self.head
         while current:
             yield current.data
             current = current.next
-
+    
+    # check if the deque is empty
     def isEmpty(self):
         return self.head is None
 
+    # add an element to the end the deque
     def append(self, data):
         new_node = Node(data)
         if self.isEmpty():
@@ -35,6 +37,7 @@ class MyDeque:
             self.tail = new_node
         self.count += 1
 
+    # add an element to the beginning of the deque
     def appendleft(self, data):
         new_node = Node(data)
         if self.isEmpty():
@@ -45,7 +48,7 @@ class MyDeque:
             self.head = new_node
         self.count += 1
 
-
+    # remove and return the last element of the deque
     def pop(self):
         if self.isEmpty():
             return None
@@ -58,6 +61,7 @@ class MyDeque:
             self.tail.next = None
         return removed_data
 
+    # remove and return the first element of the deque
     def popleft(self):
         if self.isEmpty():
             return None
@@ -70,6 +74,7 @@ class MyDeque:
             self.head.prev = None
         return removed_data
 
+    # get the number of element in the deque
     def __len__(self):
         return self.count
 
@@ -80,17 +85,17 @@ class Patient:
         self.name = name
         self.dob = dob
         self.medical_history = medical_history
-        self.medical_condition = medical_condition 
-        self.date_of_admission = date_of_admission 
+        self.medical_condition = medical_condition # we create a new attribute
+        self.date_of_admission = date_of_admission # we create a new attribute
         self.appointments = []
-        self.doctor = None
+        self.doctor = None  # track the doctor assigned to the patient
 
 
 class Doctor:
     def __init__(self, id, name):
         self.id = id
         self.name = name
-        self.appointments = [] 
+        self.appointments = [] # an empty list for patient appointments
 
 
 class Prescription:
@@ -100,19 +105,19 @@ class Prescription:
         self.medication = medication
 
 
-patients = []
-doctors = []
-consultation_queue = MyDeque()
-patient_records = {}
-doctor_records = defaultdict(list)  
-prescriptions = []
+patients = [] # List to store the patient records
+doctors = [] # List to store the doctor records
+consultation_queue = MyDeque() # FIFO queue
+patient_records = {} # Dictionary to store patient records
+doctor_records = defaultdict(list)   # Dictionary to store doctor records, with a list of appointment for each doctor 
+prescriptions = [] # a list to store prescription
 
 
 def password1(password):
-    return password == "Password123" 
+    return password == "Password123"  # Replace the password with stronger mechanism
 
 
-class PatientRecordGUI(tk.Tk): 
+class PatientRecordGUI(tk.Tk):  # GUI class definition 
 
     def __init__(self):
         super().__init__()
@@ -121,7 +126,7 @@ class PatientRecordGUI(tk.Tk):
 
         preset_doctor = Doctor(id="D001", name="Dr. Ahmed")
         doctors.append(preset_doctor)
-        doctor_records[preset_doctor.id] = [] 
+        doctor_records[preset_doctor.id] = [] # create a list to schedule appointments for this doctor 
 
         if not self.password():
             return
@@ -129,6 +134,7 @@ class PatientRecordGUI(tk.Tk):
         self.GUI_widgets()
 
     def GUI_widgets(self):
+        # create labels and entry fields for patient information 
         self.label_patient_id = tk.Label(self, text="Patient ID:")
         self.entry_patient_id = tk.Entry(self)
 
@@ -172,7 +178,7 @@ class PatientRecordGUI(tk.Tk):
 
         self.button_process_current_patient = tk.Button(self, text="Process Current Patient",
                                                      command=self.process_current_patient)
-        self.button_process_current_patient.grid(row=14, column=1, pady=5)
+        self.button_process_current_patient.grid(row=14, column=1, pady=5)  # modify the row as required 
 
 
 
@@ -187,56 +193,75 @@ class PatientRecordGUI(tk.Tk):
         self.entry_date_of_admission = tk.Entry(self)
         self.entry_date_of_admission.grid(row=5, column=1, padx=5)
 
+        # ID of the patient 
         self.label_patient_id.grid(row=0, column=0, pady=5)
         self.entry_patient_id.grid(row=0, column=1, padx=5)
 
+        # Name of the patient
         self.label_patient_name.grid(row=1, column=0, pady=5)
         self.entry_patient_name.grid(row=1, column=1, padx=5)
 
+        # Date of Birth of the patient
         self.label_patient_dob.grid(row=2, column=0, pady=5)
         self.entry_patient_dob.grid(row=2, column=1, padx=5)
 
+
+        # Medical History of the patient
         self.label_patient_medical_history.grid(row=3, column=0, pady=5)
         self.entry_patient_medical_history.grid(row=3, column=1, padx=5)
 
+        # Medical Condtition of the patient
         self.label_medical_condition.grid(row=4, column=0, pady=5)
         self.entry_medical_condition.grid(row=4, column=1, padx=5)
 
+
+        # Date of Admission for the patient
         self.label_date_of_admission.grid(row=5, column=0, pady=5)
         self.entry_date_of_admission.grid(row=5, column=1, padx=5)
 
+        # button to add Patient
         self.button_add_patient.grid(row=6, column=1, pady=5)
 
+        # button to Remove Patient
         self.button_remove_patient.grid(row=6, column=2, pady=5)
 
+        # Update patient's Medical Condition
         self.label_update_med.grid(row=7, column=0, pady=5)
         self.entry_update_med.grid(row=7, column=1, padx=5)
 
-        
+        # button to Update Patient
         self.button_update_patient.grid(row=8, column=1, pady=5)
 
+
+        # ID of the doctor 
         self.label_doctor_id.grid(row=9, column=0, pady=5)
         self.entry_doctor_id.grid(row=9, column=1, padx=5)
 
+        # Appointment Date - placed under the Doctor ID
         self.label_appointment_date.grid(row=10, column=0, pady=5)
         self.entry_appointment_date.grid(row=10, column=1, padx=5)
 
-        
+        # button to Schedule Appointment - moved under Appointment Date
         self.button_book_appointment.grid(row=11, column=1, pady=5)
 
-        
+        # Medication
         self.label_medication.grid(row=12, column=0, pady=5)
         self.entry_medication.grid(row=12, column=1, padx=5)
 
+        # button to Describe Prescription
         self.button_describe_prescription.grid(row=13, column=1, pady=5)
 
+        # button to find Patient - relocated
         self.button_findpatient.grid(row=14, column=1, pady=5)
         self.button_findpatient = tk.Button(self, text="Find Patient", command=self.findpatient)
         self.button_findpatient.grid(row=15, column=1, pady=5)
 
+        #  Label and Text for Search Result - Moved to follow find Patient Button
         self.label_patient_data.grid(row=15, column=0, pady=5)
         self.text_patient_data.grid(row=16, column=0, columnspan=2, padx=5, pady=5)
 
+
+        # Label and Listbox for consultation queue - adjusted to follow search result 
         self.label_consultation_queue = tk.Label(self, text="Consultation Queue:")
         self.label_consultation_queue.grid(row=15, column=0, pady=5) 
         self.listbox_consultation_queue = tk.Listbox(self, height=10, width=50)
@@ -244,6 +269,8 @@ class PatientRecordGUI(tk.Tk):
         self.label_consultation_queue.grid(row=17, column=0, pady=5)
         self.listbox_consultation_queue.grid(row=18, column=0, columnspan=2, padx=5, sticky="ew")
 
+
+        # Button to Process Next Patient - adjusted row number 
         self.button_process_current_patient = tk.Button(self, text="Process Current Patient",
                                                         command=self.process_current_patient)
         self.button_process_current_patient.grid(row=14, column=1, pady=5) 
@@ -279,8 +306,8 @@ def password(self):
         name = self.entry_patient_name.get()
         dob = self.entry_patient_dob.get()
         medical_history = self.entry_patient_medical_history.get()
-        medical_condition = self.entry_medical_condition.get()  
-        date_of_admission = self.entry_date_of_admission.get()  
+        medical_condition = self.entry_medical_condition.get()   # additional detail
+        date_of_admission = self.entry_date_of_admission.get()   # additional detail
 
         if patient_id and name and dob and medical_history and medical_condition and date_of_admission:
             new_patient = Patient(patient_id, name, dob, medical_history, medical_condition, date_of_admission)
@@ -292,7 +319,7 @@ def password(self):
 
     def update_patientrecord(self):
         patient_id = self.entry_patient_id.get()
-        update_med = self.entry_update_med.get()  
+        update_med = self.entry_update_med.get()  # Assuming this is updated medical history
         if patient_id in patient_records:
             patient_records[patient_id].medical_history = update_med
             messagebox.showinfo("Success!", "Patient record has been updated.")
@@ -310,7 +337,7 @@ def password(self):
     def book_appointment(self):
         patient_id = self.entry_patient_id.get()
         doctor_id = self.entry_doctor_id.get()
-        appointment_date = self.get_appointment_date() 
+        appointment_date = self.get_appointment_date() # returning the input date
 
         if patient_id in patient_records and doctor_id in doctor_records:
             if self.available_appointments(doctor_id, appointment_date):
@@ -329,27 +356,27 @@ def password(self):
 
     def process_current_patient(self):
         if not consultation_queue.isEmpty():
-            patient_id = consultation_queue.popleft()  
-            self.update_consultation_display()  
+            patient_id = consultation_queue.popleft()   # Removing the next patient from the queue
+            self.update_consultation_display()  # Update the display of the Listbox
    
         else:
             messagebox.showerror("Error", "There are no patients in the queue.")
 
     def update_consultation_display(self):
-        self.listbox_consultation_queue.delete(0, tk.END) 
+        self.listbox_consultation_queue.delete(0, tk.END) # remove the existing entries
 
         for index, patient_id in enumerate(consultation_queue):
-            
+            # retrieve the patient name based on their ID 
             if patient_id in patient_records:
                 patient_name = patient_records[patient_id].name
                 display_text = f"{patient_id} - {patient_name}"
             else:
                 display_text = f"{patient_id} - Name not found"
 
-            
-            if index == 0:  
+            # identify the first and last patient in the queue to make it easier to understand 
+            if index == 0:  # First patient in the queue
                 display_text = "First: " + display_text
-            elif index == len(consultation_queue) - 1:  
+            elif index == len(consultation_queue) - 1:  # Last patient in the queue
                 display_text = "Last: " + display_text
 
             self.listbox_consultation_queue.insert(tk.END, display_text)
@@ -366,29 +393,29 @@ def password(self):
         else:
             messagebox.showerror("Error", "Invalid input.")
 
-    def available_appointments(self, doctor_id, appointment_date):
+    def available_appointments(self, doctor_id, appointment_date):# verify whether the doctor is available on the specific appointment date 
 
-        
+        # confirm whether the doctor is listed in the records
         if doctor_id not in doctor_records:
             messagebox.showerror("Error", "Doctor ID not found.")
             return False
 
-      
+         # retrieve the doctors scheduled appointments and check if the date is already taken 
         for appointment in doctor_records[doctor_id]:
-            if appointment[2] == appointment_date:  
+            if appointment[2] == appointment_date:  # Assuming that the data stored as a third element in the tuple
                 messagebox.showerror("Error", f"Doctor is not available on {appointment_date}.")
                 return False
 
-        
+        # return True if the date is available 
         return True
 
     def describe_prescription(self):
-        
+        # make sure that IDs are uniformly trimmed and formatted 
         patient_id = self.entry_patient_id.get().strip()
         doctor_id = self.entry_doctor_id.get().strip()
         medication = self.entry_medication.get().strip()
 
-        
+        # Example validation and inclusion in the list
         if patient_id in patient_records:
             new_prescription = Prescription(patient_id, doctor_id, medication)
             prescriptions.append(new_prescription)
@@ -397,7 +424,7 @@ def password(self):
             messagebox.showerror("Error", "Patient ID not found.")
 
     def findpatient(self):
-        patient_id = self.entry_patient_id.get().strip() 
+        patient_id = self.entry_patient_id.get().strip() # Consistent ID formatting
         if patient_id in patient_records:
             patient = patient_records[patient_id]
             medications = [prescription.medication for prescription in prescriptions if
@@ -405,7 +432,7 @@ def password(self):
 
             medications_str = ", ".join(medications) if medications else "No medications found"
 
-            
+            # add the list of medication to the search result
             patient_data = (f"Patient ID: {patient.id}\n"
                              f"Name: {patient.name}\n"
                              f"Date of Birth: {patient.dob}\n"
@@ -421,21 +448,22 @@ def password(self):
             messagebox.showerror("Error", "Patient not found.")
 
     def sort_patients(self):
-        
-        sort_option = self.get_sort_option()  
+        # develop a system to arrange patient records according to the user preference, such as  ID, name, admission date
+        # this task may entail using sorting algorithms like bubble sort, or  merge sort or libraries like `sorted`
+        sort_option = self.get_sort_option()   # develop a mechanism to retrieve sorting preference from the GUI
         if sort_option == "id":
             sorted_patients = sorted(patients, key=lambda p: p.id)
         elif sort_option == "name":
             sorted_patients = sorted(patients, key=lambda p: p.name)
-        
+        # include additional sorting choices as required
         elif sort_option == "admission_date":
             sorted_patients = sorted(patients, key=lambda p: p.admission_date)
-        
+        # include additional sorting choices as required
         else:
             print("Invalid sort option.")
             return
 
-        
+        # Update the patient records dictionary to reflect the sorted order chosen by the user
         for i, patient in enumerate(sorted_patients):
             patient_records[patient.id] = patient
 
@@ -452,7 +480,7 @@ def password(self):
         file_menu.add_command(label="Exit", command=self.quit)
         menu_bar.add_cascade(label="File", menu=file_menu)
 
-        
+        # menu dedicated to patient management 
         patient_menu = tk.Menu(menu_bar, tearoff=0)
         patient_menu.add_command(label="Add Patient Record", command=self.add_patientrecord)
         patient_menu.add_command(label="Update Patient Record", command=self.update_patientrecord)
@@ -461,12 +489,12 @@ def password(self):
         patient_menu.add_command(label="Sort Patients", command=self.sort_patients)
         menu_bar.add_cascade(label="Patient Management", menu=patient_menu)
 
-        
+        # menu for managing appointments 
         appointment_menu = tk.Menu(menu_bar, tearoff=0)
         appointment_menu.add_command(label="Book Appointment", command=self.book_appointment)
         menu_bar.add_cascade(label="Appointment Management", menu=appointment_menu)
 
-        
+        # menu for managing prescriptions
         prescription_menu = tk.Menu(menu_bar, tearoff=0)
         prescription_menu.add_command(label="Describe Prescription", command=self.describe_prescription)
         menu_bar.add_cascade(label="Prescription Management", menu=prescription_menu)
@@ -474,7 +502,7 @@ def password(self):
         self.config(menu=menu_bar)
 
     def main(self):
-        self.create_menu()  
+        self.create_menu()   # establish the menu prior to entering the main loop
         self.mainloop()
 
 
